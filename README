@@ -1,0 +1,27 @@
+###算法
+
+设定总时间为5000豪秒
+最大间隔为300，代表最后次运动间隔,按照图形,最后一步转动30度
+最小间隔为60
+每次运动转动60度
+
+设数组arr[300,280,260...60,60,60]
+sum +=a[i] i~0;i++
+sum>=5000 时，len =i
+
+抽到魅族需转动360*n+60+30度
+则需要转动 count=6n+2次
+<script type="text/javascript">
+   count = (Math.floor(len-1)/6)*6 + 2;
+</script>
+ 算出count
+
+<script type="text/javascript">
+
+   move(){
+   	if(i<count){
+   	setTimeout(move(),arr[i]);
+   	}
+   	i++
+   }
+</script>
