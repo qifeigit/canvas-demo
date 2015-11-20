@@ -28,7 +28,7 @@ var lotteryChart = (function() {
             //获取图片
             var self = this;
             var ctx = this.ctx;
-            var time_inteval = [2, 2];
+            var time_inteval = [250];
             var sum_time = 0;
             var Time_terminal = this.times * 1000;
             //important var
@@ -36,12 +36,21 @@ var lotteryChart = (function() {
             var start = this.start;
             var end = this.end;
             var frequency = 60;
-            var len = Time_terminal / frequency;
-            var moveMount = this.len * Math.floor(len / this.len) + end - 1;
+            var timeOut1, timeOut2;
+            // var len = Time_terminal / frequency;
+            // var moveMount = this.len * Math.floor(len / this.len) + end - 1;
             while (sum_time < Time_terminal) {
-                time_inteval[time_inteval.length] = time_inteval[time_inteval.length - 1] + 2;
-                sum_time += time_inteval[time_inteval.length - 1];
+                if (time_inteval[0] > 30) {
+                    time_inteval.unshift(time_inteval[0] - 30);
+                } else {
+                    time_inteval.unshift(60);
+                }
+                // time_inteval[time_inteval.length] = time_inteval[time_inteval.length - 1] + 2;
+                sum_time += time_inteval[0];
             }
+            moveMount = this.len * Math.floor(time_inteval.length / this.len) + end;
+            // moveMount =1;
+            console.log(moveMount);
 
             function switchImage(i) {
                 var pre = (i + self.len - 1) % (self.len);
@@ -62,6 +71,7 @@ var lotteryChart = (function() {
             }
 
             function moveFunc_line() {
+
                 if (i <= moveMount) {
                     i++;
                     switchImage(i);
@@ -73,31 +83,51 @@ var lotteryChart = (function() {
             }
 
             function moveFunc_fastToSlow() {
+                console.log(i,moveMount);
                 if (i <= moveMount) {
-                    i++;
+
                     switchImage(i);
                     if (i % 4 == 0) {
                         var curTime = Number(new Date());
                         if (curTime - self.startTime > 2000 && self.success == 1) {
-                            moveMount +=  self.newEnd - self.end;
+                            clearTimeout(timeOut1);
+                            console.log(self.newEnd, self.end);
+                            var tempId = self.newEnd - self.end;
+                            if (tempId >= 0) {
+                                moveMount -= self.len - tempId;
+                            } else {
+                                moveMount += tempId;
+                            }
                             moveFunc_fastToSlow_1();
+
+                        } else {
+                            timeOut1 = setTimeout(function() {
+                                moveFunc_fastToSlow();
+                            }, time_inteval[i]);
+                            i++;
                         }
+                    } else {
+                        timeOut1 = setTimeout(function() {
+                            moveFunc_fastToSlow();
+                        }, time_inteval[i]);
+                        i++;
                     }
-                    setTimeout(function() {
-                        moveFunc_fastToSlow();
-                    }, time_inteval[i]);
+
                 }
             }
 
             function moveFunc_fastToSlow_1() {
+                console.log(i, moveMount);
+                i++;
                 if (i <= moveMount) {
-                    i++;
+
                     switchImage(i);
-                    moveFunc_fastToSlow_1();
                     setTimeout(function() {
                         moveFunc_fastToSlow_1();
                     }, time_inteval[i]);
+
                 }
+               
             }
         }
         //把图像放在canvas上
@@ -144,6 +174,7 @@ var lotteryChart = (function() {
                 case 2:
                     x -= 100;
                     break;
+                    break;
                     // case 0:x+=100;break;
             }
         }
@@ -157,10 +188,10 @@ var lotteryChart = (function() {
 lotteryChart.init({
     canvas: document.querySelector('#js-canvas'),
     imageArray: ['1.jpg', '2.jpg', '3.jpg', '4.jpg'],
-    times: 5,
+    times: 4,
     waitTime: 2,
     start: 0,
-    end: 2,
+    end: 3,
     //运动方式 line-move,fastToSlow-简单的,
     movePatt: 'fastToSlow',
 });
@@ -172,5 +203,6 @@ lotteryChart.init({
 //     lotteryChart.move();
 // }, 2000);
 document.getElementById('js-canvas').onclick = function() {
+
     lotteryChart.move();
 }
